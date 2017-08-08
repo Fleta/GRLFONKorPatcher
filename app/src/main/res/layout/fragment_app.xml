@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".5"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/no_space"
+            style="@style/Grids"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:text="GUIAPK 서버" />
+
+        <TextView
+            android:id="@+id/textView7"
+            style="@style/Grids"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.25"
+            android:text="설치된 버전" />
+
+        <TextView
+            android:id="@+id/textView6"
+            style="@style/Grids"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.25"
+            android:text="최신 버전" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".75"
+        android:orientation="horizontal"
+        android:weightSum="10">
+
+        <TextView
+            android:id="@+id/dis_dskyversion"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:text="운영사 버전" />
+
+        <TextView
+            android:id="@+id/text_dskyVersion"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.25"
+            android:gravity="center_horizontal"
+            android:text="N/A" />
+
+        <TextView
+            android:id="@+id/text_newdsky"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.25"
+            android:gravity="center_horizontal"
+            android:text="N/A" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".75"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/dis_biliversion"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.5"
+            android:text="비리비리 버전" />
+
+        <TextView
+            android:id="@+id/text_biliVersion"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.25"
+            android:gravity="center_horizontal"
+            android:text="N/A" />
+
+        <TextView
+            android:id="@+id/text_newBili"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3.25"
+            android:gravity="center_horizontal"
+            android:text="N/A" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="6"
+        android:gravity="bottom|right"
+        android:text="검열해제는 루팅 기기 전용입니다." />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="2"
+            android:text="프로즌 사이트로 이동" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="6"
+            android:text="검열해제" />
+
+    </LinearLayout>
+
+</LinearLayout>
