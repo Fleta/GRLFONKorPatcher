@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "993550303553",
+    "firebase_url": "https://grlfonpatcher.firebaseio.com",
+    "project_id": "grlfonpatcher",
+    "storage_bucket": "grlfonpatcher.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:993550303553:android:d4102181977c4cac",
+        "android_client_info": {
+          "package_name": "team.hatsan.grlfonkorpatcher"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "993550303553-oqe2thtj79r1sq850m1bpisbfr1qvjo8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBrKeAETVaYet-qA7soWVuBkqUYXOZatYI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
