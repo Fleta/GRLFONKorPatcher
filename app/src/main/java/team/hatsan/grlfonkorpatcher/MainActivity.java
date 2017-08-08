@@ -1,6 +1,7 @@
 package team.hatsan.grlfonkorpatcher;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -38,7 +40,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     ProgressDialog pbar;
     ProgressDialog loadingBar;
@@ -79,6 +81,34 @@ public class MainActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.action_menu, menu);
         return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId())
+        {
+            case R.id.action_refresh:
+                cleaner();
+                afterPer();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void cleaner()
+    {
+        TextView contex = (TextView) findViewById(R.id.text_curDate);
+        TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
+        TextView bilitex = (TextView) findViewById(R.id.text_biliVersion);
+        TextView newdsky = (TextView) findViewById(R.id.text_newdsky);
+        TextView newBili = (TextView) findViewById(R.id.text_newBili);
+        TextView noticetex = (TextView) findViewById(R.id.text_notice);
+
+        contex.setText("N/A");
+        newdsky.setText("");
+        newBili.setText("");
+        noticetex.setText("");
     }
 
     public void afterPer(){
@@ -236,7 +266,7 @@ public class MainActivity extends AppCompatActivity {
             notice = guidObject.getString("rendered");
             notice = notice.replace("<p>", "");
             notice = notice.replace("<strong>", "");
-            notice = notice.replace("</p>", "");
+            notice = notice.replace("</p>", "\n");
             notice = notice.replace("</strong>", "");
 
             TextView nos = (TextView) findViewById(R.id.text_notice);

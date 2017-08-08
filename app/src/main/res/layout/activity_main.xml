@@ -17,31 +17,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight=".5"
-        android:background="@drawable/shape"
-        android:orientation="horizontal">
-
-        <TextView
-            android:id="@+id/dis_curversion"
-            style="@style/Versions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="7"
-            android:text="텍스트 변경일" />
-
-        <TextView
-            android:id="@+id/text_curDate"
-            style="@style/Versions"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_weight="3"
-            android:text="N/A" />
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight=".5"
         android:orientation="horizontal">
 
         <TextView
@@ -50,7 +25,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_weight="3.5"
-            android:text="GUIAPK 서버" />
+            android:text="게임 서버" />
 
         <TextView
             android:id="@+id/textView7"
@@ -90,6 +65,7 @@
             style="@style/Versions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_weight="3.25"
             android:text="N/A" />
 
@@ -98,6 +74,7 @@
             style="@style/Versions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_weight="3.25"
             android:text="N/A" />
 
@@ -122,6 +99,7 @@
             style="@style/Versions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_weight="3.25"
             android:text="N/A" />
 
@@ -130,7 +108,34 @@
             style="@style/Versions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:gravity="center"
             android:layout_weight="3.25"
+            android:text="N/A" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight=".65"
+        android:background="@drawable/shape"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/dis_curversion"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="7"
+            android:text="텍스트 변경일" />
+
+        <TextView
+            android:id="@+id/text_curDate"
+            style="@style/Versions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
             android:text="N/A" />
 
     </LinearLayout>
