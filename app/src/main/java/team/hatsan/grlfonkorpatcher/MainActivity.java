@@ -1,6 +1,7 @@
 package team.hatsan.grlfonkorpatcher;
 
 import android.Manifest;
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -17,6 +18,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
@@ -38,7 +40,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity{
 
     ProgressDialog pbar;
     ProgressDialog loadingBar;
@@ -55,8 +57,10 @@ public class MainActivity extends AppCompatActivity {
     String langByte;
     File downloadAddr;
     File resultAddr;
+    int deleteType;
     boolean canBili = false;
     boolean candsky = false;
+    boolean isInstalledv = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,6 +85,34 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item){
+        switch(item.getItemId())
+        {
+            case R.id.action_refresh:
+                cleaner();
+                afterPer();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    public void cleaner()
+    {
+        TextView contex = (TextView) findViewById(R.id.text_curDate);
+        TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
+        TextView bilitex = (TextView) findViewById(R.id.text_biliVersion);
+        TextView newdsky = (TextView) findViewById(R.id.text_newdsky);
+        TextView newBili = (TextView) findViewById(R.id.text_newBili);
+        TextView noticetex = (TextView) findViewById(R.id.text_notice);
+
+        contex.setText("N/A");
+        newdsky.setText("");
+        newBili.setText("");
+        noticetex.setText("");
+    }
+
     public void afterPer(){
         TextView contex = (TextView) findViewById(R.id.text_curDate);
         TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
@@ -98,46 +130,6 @@ public class MainActivity extends AppCompatActivity {
         postGetText();
         PackageManager pm = this.getPackageManager();
 
-        String verTemp;
-
-        if(isInstalled("com.digitalsky.girlsfrontline.cn", this))
-        {
-            candsky = true;
-            verTemp = getVersion("com.digitalsky.girlsfrontline.cn", this);
-            if(verTemp.equals(newdskyver))
-            {
-                dskytex.setTextColor(Color.BLUE);
-            }
-            else
-            {
-                dskytex.setTextColor(Color.RED);
-            }
-            dskytex.setText(verTemp);
-        }
-        else
-        {
-            dskytex.setTextColor(Color.RED);
-            dskytex.setText("미설치");
-        }
-        if(isInstalled("com.digitalsky.girlsfrontline.cn.bili", this))
-        {
-            canBili = true;
-            verTemp = getVersion("com.digitalsky.girlsfrontline.cn.bili", this);
-            if(verTemp.equals(newBiliver))
-            {
-                bilitex.setTextColor(Color.BLUE);
-            }
-            else
-            {
-                bilitex.setTextColor(Color.RED);
-            }
-            bilitex.setText(verTemp);
-        }
-        else
-        {
-            bilitex.setTextColor(Color.RED);
-            bilitex.setText("미설치");
-        }
     }
 
     public void postGetText()
@@ -236,7 +228,7 @@ public class MainActivity extends AppCompatActivity {
             notice = guidObject.getString("rendered");
             notice = notice.replace("<p>", "");
             notice = notice.replace("<strong>", "");
-            notice = notice.replace("</p>", "");
+            notice = notice.replace("</p>", "\n");
             notice = notice.replace("</strong>", "");
 
             TextView nos = (TextView) findViewById(R.id.text_notice);
@@ -246,6 +238,8 @@ public class MainActivity extends AppCompatActivity {
             TextView newdsky = (TextView) findViewById(R.id.text_newdsky);
             TextView newBili = (TextView) findViewById(R.id.text_newBili);
             TextView noticetex = (TextView) findViewById(R.id.text_notice);
+            TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
+            TextView bilitex = (TextView) findViewById(R.id.text_biliVersion);
 
             Double showSizeL = Double.parseDouble(langByte);
             Double showSizeT = Double.parseDouble(textesByte);
@@ -253,6 +247,47 @@ public class MainActivity extends AppCompatActivity {
             noticetex.setText(notice);
             newdsky.setText(newdskyver);
             newBili.setText(newBiliver);
+
+            String verTemp;
+
+            if(isInstalled("com.digitalsky.girlsfrontline.cn", this))
+            {
+                candsky = true;
+                verTemp = getVersion("com.digitalsky.girlsfrontline.cn", this);
+                if(verTemp.equals(newdskyver))
+                {
+                    dskytex.setTextColor(Color.BLUE);
+                }
+                else
+                {
+                    dskytex.setTextColor(Color.RED);
+                }
+                dskytex.setText(verTemp);
+            }
+            else
+            {
+                dskytex.setTextColor(Color.RED);
+                dskytex.setText("미설치");
+            }
+            if(isInstalled("com.digitalsky.girlsfrontline.cn.bili", this))
+            {
+                canBili = true;
+                verTemp = getVersion("com.digitalsky.girlsfrontline.cn.bili", this);
+                if(verTemp.equals(newBiliver))
+                {
+                    bilitex.setTextColor(Color.BLUE);
+                }
+                else
+                {
+                    bilitex.setTextColor(Color.RED);
+                }
+                bilitex.setText(verTemp);
+            }
+            else
+            {
+                bilitex.setTextColor(Color.RED);
+                bilitex.setText("미설치");
+            }
 
             loadingBar.dismiss();
         }
@@ -294,6 +329,112 @@ public class MainActivity extends AppCompatActivity {
             e.printStackTrace();
             return "";
         }
+    }
+
+    public void deletePatch(View v)
+    {
+        isInstalledv = false;
+        //deleteType = -1; //DigitalSky = 0, BiliBili = 1
+        final AlertDialog.Builder isBiliDsky = new AlertDialog.Builder(this);
+        isBiliDsky.setTitle("플랫폼 선택");
+        isBiliDsky.setMessage("한글패치를 삭제할 플랫폼을 선택해주세요.");
+        isBiliDsky.setNegativeButton("운영사", new DialogInterface.OnClickListener(){
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(candsky)
+                {
+                    isInstalledv = true;
+                    deleteType = 0;
+                    dialog.dismiss();
+                }
+                prePatchDelete(isInstalledv, deleteType);
+            }
+        });
+        isBiliDsky.setPositiveButton("비리비리", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                if(canBili)
+                {
+                    isInstalledv = true;
+                    deleteType = 1;
+                    dialog.dismiss();
+                }
+                prePatchDelete(isInstalledv, deleteType);
+            }
+        });
+        isBiliDsky.show();
+    }
+
+    public void prePatchDelete(boolean b, int i)
+    {
+        AlertDialog.Builder isConfirm = new AlertDialog.Builder(this);
+        if(isInstalledv)
+        {
+            isConfirm.setTitle("확인");
+            isConfirm.setTitle("한글패치를 제거합니다. 진행하시겠습니까?");
+            isConfirm.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            isConfirm.setNegativeButton("예", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    postdeletePatch(deleteType);
+                    dialog.dismiss();
+                }
+            });
+        }
+        else
+        {
+            isConfirm.setTitle("패키지 없음");
+            isConfirm.setMessage("해당 플랫폼의 소녀전선 앱이 설치되어 있지 않습니다.");
+            isConfirm.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+        }
+        isConfirm.show();
+    }
+
+    public void postdeletePatch(int i)
+    {
+        File langs;
+        File texts;
+        String temp_Targetaddr = null;
+        switch(i)
+        {
+            case 0:
+                temp_Targetaddr = Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn/files/Android/";
+                break;
+            case 1:
+                temp_Targetaddr = Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn.bili/files/Android/";
+                break;
+        }
+        langs = new File(temp_Targetaddr, "asset_language.ab");
+        texts = new File(temp_Targetaddr, "asset_textes.ab");
+        if(langs.exists())
+        {
+            langs.delete();
+        }
+        if(texts.exists())
+        {
+            texts.delete();
+        }
+
+        AlertDialog.Builder doneDelete = new AlertDialog.Builder(this);
+        doneDelete.setTitle("제거 완료");
+        doneDelete.setMessage("한글 패치가 제거되었습니다.\n게임에 재접속하여 텍스트 데이터를 다시 받아주세요.");
+        doneDelete.setPositiveButton("확인", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        doneDelete.show();
     }
 
     public void patchbili(View v)
@@ -577,7 +718,7 @@ public class MainActivity extends AppCompatActivity {
                     if(FileSize > 0)
                     {
                         double per = ((double)downloadedSize/FileSize) * 100;
-                        String meg = "다운로드 중\n" + (int)downloadedSize + "KB / "+(int)FileSize + "KB ("+ (int)per+"%)";
+                        String meg = "다운로드 중\n" + (int)downloadedSize + "Byte / "+(int)FileSize + "Byte ("+ (int)per+"%)";
                         publishProgress((int)((downloadedSize * 100) / FileSize) + "", meg);
                     }
 
@@ -615,6 +756,16 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void moveFiles(String zipFile, String targetLoc){
+        File beforePatchlang = new File(targetLoc, "asset_language.ab");
+        File beforePatchtext = new File(targetLoc, "asset_textes.ab");
+        if(beforePatchlang.exists())
+        {
+            beforePatchlang.delete();
+        }
+        if(beforePatchtext.exists())
+        {
+            beforePatchtext.delete();
+        }
         Decompress d = new Decompress(zipFile, targetLoc);
         d.unzip();
         File langFile = new File(targetAddr, "asset_language.ab");
@@ -650,6 +801,15 @@ public class MainActivity extends AppCompatActivity {
             fcout.close();
             inputStream.close();
             outputStream.close();
+
+            if(beforePatchlang.exists())
+            {
+                beforePatchlang.delete();
+            }
+            if(beforePatchtext.exists())
+            {
+                beforePatchtext.delete();
+            }
 
             AlertDialog.Builder alertEnd = new AlertDialog.Builder(this);
             alertEnd.setTitle("패치 완료").setMessage("패치가 완료되었습니다.");
