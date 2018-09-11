@@ -1,0 +1,245 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ads="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/img_background">
+
+    <TextView
+        android:id="@+id/dis_guiWarning"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:layout_weight="2"
+        android:background="@drawable/img_caution"
+        android:gravity="center"
+        android:text="@string/xml_guiWarning"
+        android:textColor="@color/realRed" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.25"
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:background="@drawable/img_version"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/dis_updatedDskyVersion"
+                style="@style/Versions"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:layout_marginTop="2dp"
+                android:text="@string/xml_latestDigitalskyVersion"
+                android:textColor="@android:color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/text_latestDskyVersion"
+                style="@style/VersionDetail"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="6"
+                android:textColor="@android:color/white"
+                android:text="N/A" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:background="@drawable/img_version"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/dis_currentDskyVersion"
+                style="@style/Versions"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:layout_marginTop="2dp"
+                android:text="@string/xml_currentDigitalskyVersion"
+                android:textColor="@android:color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/text_currentDskyVersion"
+                style="@style/VersionDetail"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="6"
+                android:textColor="@android:color/white"
+                android:text="N/A" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1.25"
+        android:layout_margin="5dp"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:layout_margin="1dp"
+            android:background="@drawable/img_version"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/dis_updatedBiliVersion"
+                style="@style/Versions"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:layout_marginTop="2dp"
+                android:text="@string/xml_latestBilibiliVersion"
+                android:textColor="@android:color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/text_latestBiliVersion"
+                style="@style/VersionDetail"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="6"
+                android:textColor="@android:color/white"
+                android:text="N/A" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_weight="1.05"
+            android:layout_margin="1dp"
+            android:background="@drawable/img_version"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/dis_currnetBiliVersion"
+                style="@style/Versions"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="4"
+                android:layout_marginTop="2dp"
+                android:text="@string/xml_currentBilibiliVersion"
+                android:textColor="@android:color/white"
+                android:textSize="14dp" />
+
+            <TextView
+                android:id="@+id/text_currentBiliVersion"
+                style="@style/VersionDetail"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="6"
+                android:textColor="@android:color/white"
+                android:text="N/A" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:layout_weight="5"
+        android:background="@drawable/img_notice"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/textView9"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="5dp"
+            android:layout_weight="1"
+            android:text="@string/xml_guiNotice"
+            android:textColor="@android:color/white"
+            android:textSize="18dp" />
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="5dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_weight="6.80"
+            android:scrollbarDefaultDelayBeforeFade="50000"
+            android:scrollbarStyle="insideOverlay"
+            android:scrollbarSize="4dp"
+            android:scrollbarThumbVertical="@android:color/white">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_guiNotice"
+                    android:layout_width="match_parent"
+                    android:layout_height="0dp"
+                    android:layout_weight="9"
+                    android:text="None"
+                    android:textColor="@android:color/white"
+                    android:textSize="16dp" />
+
+            </LinearLayout>
+        </ScrollView>
+
+        <TextView
+            android:id="@+id/textView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.7" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="5dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btn_reqestApkDownload"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@drawable/img_guibutton"
+            android:scaleX="0.95"
+            android:scaleY="0.95"
+            android:text="@string/xml_btn_apkDownload"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btn_showDownList"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="3"
+            android:background="@drawable/img_listbutton"
+            android:scaleX="0.95"
+            android:scaleY="0.95"
+            android:text="@string/xml_btn_showDownList"
+            android:textColor="@android:color/white" />
+    </LinearLayout>
+
+</LinearLayout>

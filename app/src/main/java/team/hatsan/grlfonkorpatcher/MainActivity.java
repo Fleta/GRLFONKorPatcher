@@ -1,315 +1,648 @@
 package team.hatsan.grlfonkorpatcher;
 
+import android.*;
 import android.Manifest;
-import android.app.ActionBar;
+import android.app.ActivityGroup;
+import android.app.DownloadManager;
 import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.pm.PackageInfo;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.StringRes;
+import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.view.GravityCompat;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
+import android.widget.CheckBox;
+import android.widget.Toast;
 
-import org.json.JSONArray;
+import com.google.android.gms.ads.MobileAds;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.tsengvn.typekit.Typekit;
+import com.tsengvn.typekit.TypekitContextWrapper;
+
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
-import org.jsoup.select.Elements;
 
 import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.channels.FileChannel;
+import java.nio.charset.Charset;
+import java.util.List;
 
-public class MainActivity extends AppCompatActivity{
 
-    ProgressDialog pbar;
-    ProgressDialog loadingBar;
-    String newBiliver;
-    String newdskyver;
-    String upDate;
-    String reqURL = "https://frozens.tk/files/check.json";
-    String sideAURL = "http://ftp.frozens.tk/files/170730_Android_Text_KR_Side_A_Fix1.zip";
-    String sideBURL = "http://ftp.frozens.tk/files/170730_Android_Text_KR_Side_B_Fix1.zip";
-    String selectedURL;
-    String targetAddr;
-    String notice;
-    String textesByte;
-    String langByte;
-    File downloadAddr;
-    File resultAddr;
-    int deleteType;
-    boolean canBili = false;
-    boolean candsky = false;
-    boolean isInstalledv = false;
+public class MainActivity extends AppCompatActivity
+        implements NavigationView.OnNavigationItemSelectedListener {
+
+    enum platformType {
+        DIGITALSKY, BILIBILI;
+    }
+
+    public class URLS {
+        public String checkJSON;
+        public String textNoticeJSON;
+        public String guiNoticeJSON;
+
+        public String sideA;
+        public String sideB;
+
+        public String[] apks;
+        public String patchSite;
+    }
+
+    public class Versions {
+        public String latestDigitalSky;
+        public String latestBiliBili;
+        public String latestUmb;
+    }
+
+    public class Directories {
+        public String forDownload;
+
+        public String[] forPatch = {Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn/files/Android/",
+                Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn.bili/files/Android/"};
+    }
+
+    SharedPreferences settings;
+
+    URLS urls = new URLS();
+    Versions versions = new Versions();
+    Directories directories = new Directories();
+
+    boolean firstTime;
+
+    String[] TextURL = new String[2];
+
+    ProgressDialog refreshBar;
+    ProgressDialog downloadBar;
+
+    NavigationView navigationView;
+
+    //String languageFileSize;
+    //String textesFileSize;
+
+    public class Sizes {
+        public String langSize;
+        public String textesSize;
+    }
+
+    Sizes sideA = new Sizes();
+    Sizes sideB = new Sizes();
+
+    String textesChangeDate;
+
+    String btn_sideA = "";
+    String btn_sideB = "";
+
+    boolean oneSideMode = false;
+    String patchMessage = "";
+
+    String[] components = {"team.hatsan.grlfonkorpatcher.sohatsan", "team.hatsan.grlfonkorpatcher.suomi", "team.hatsan.grlfonkorpatcher.dasboots"};
+
+    int iconType = 0;
+    int agreePush;
+
+    platformType lastPlatformType;
+    long latestID = -1;
+
+    String[] platformPackageName = {"com.digitalsky.girlsfrontline.cn", "com.digitalsky.girlsfrontline.cn.bili"};
+    String[] patchFileType = {"asset_language.ab", "asset_textes.ab"};
+
+    String umbURL;
+
+    boolean bShowUmbUpdateBox;
+    boolean bAsked = false;
+
+    boolean bCanGui = false;
+    boolean bCanText = false;
+
+    boolean bSuccessConnect = true;
+    boolean bCustomServer = false;
+
+    String customJSONURL = "";
+    String appInfo = "";
+
+    int currentFragmentPosition = 0; //0 : textKR, 1 : GUIKR, 2 : Addon
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        downloadAddr = getExternalCacheDir();
-        checkPer();
-    }
 
-    public void onBackPressed() {
-        super.onBackPressed();
-        //if((!pbar.isShowing() && (!loadingBar.isShowing()))){
-            this.finish();
-            //System.exit(0);
-        //}
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        settings = getSharedPreferences("settings", 0);
+        directories.forDownload = getExternalCacheDir().toString();
+        firstTime = false;
+
+        checkPermission();
+        initProgressDialog();
+
+        DrawerLayout drawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, drawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawerLayout.setDrawerListener(toggle);
+        toggle.syncState();
+
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        MobileAds.initialize(this, "ca-app-pub-8020827438513908~1052721285");
+
+        refresh();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.action_menu, menu);
+        getMenuInflater().inflate(R.menu.action_menu, menu);
         return true;
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item){
-        switch(item.getItemId())
-        {
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
             case R.id.action_refresh:
-                cleaner();
-                afterPer();
+                refresh();
+                return true;
+            case R.id.action_help:
+                callHelp(currentFragmentPosition);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
 
-    public void cleaner()
-    {
-        TextView contex = (TextView) findViewById(R.id.text_curDate);
-        TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
-        TextView bilitex = (TextView) findViewById(R.id.text_biliVersion);
-        TextView newdsky = (TextView) findViewById(R.id.text_newdsky);
-        TextView newBili = (TextView) findViewById(R.id.text_newBili);
-        TextView noticetex = (TextView) findViewById(R.id.text_notice);
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) { //좌측에 네비게이션 드로어 메뉴 선택
+        int id = item.getItemId();
 
-        contex.setText("N/A");
-        newdsky.setText("");
-        newBili.setText("");
-        noticetex.setText("");
-    }
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+        Fragment fragment = null;
 
-    public void afterPer(){
-        TextView contex = (TextView) findViewById(R.id.text_curDate);
-        TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
-        TextView bilitex = (TextView) findViewById(R.id.text_biliVersion);
-        TextView newdsky = (TextView) findViewById(R.id.text_newdsky);
-        TextView newBili = (TextView) findViewById(R.id.text_newBili);
-        TextView noticetex = (TextView) findViewById(R.id.text_notice);
-
-        loadingBar = new ProgressDialog(this);
-        loadingBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        loadingBar.setMessage("서버로부터 데이터를 불러오는 중입니다.");
-        loadingBar.setCancelable(false);
-        loadingBar.show();
-
-        postGetText();
-        PackageManager pm = this.getPackageManager();
-
-    }
-
-    public void postGetText()
-    {
-        DownloadText downloadText = new DownloadText("check.json", 0);
-        downloadText.execute(reqURL);
-    }
-
-    public void getText()
-    {
-        try{
-            File versionFile = new File(downloadAddr, "check.json");
-            String noticeURL;
-
-            try {
-                String jsonString = null;
-                InputStream istream = new FileInputStream(versionFile);
-                int jsonSize = istream.available();
-                byte[] jsonBuf = new byte[jsonSize];
-                istream.read(jsonBuf);
-                istream.close();
-                jsonString = new String(jsonBuf, "UTF-8");
-
-                JSONObject jsonObject = new JSONObject(jsonString);
-                JSONObject jsonFirst = jsonObject.getJSONObject("app_version");
-                JSONObject jsonAndroid = jsonFirst.getJSONObject("android");
-                JSONObject jsondsky = jsonAndroid.getJSONObject("gui_digitalsky");
-                JSONObject jsonbili = jsonAndroid.getJSONObject("gui_bilibili");
-                JSONObject jsonFinalObject = jsonAndroid.getJSONObject("text");
-                JSONObject jsonDownloadObject = jsonFinalObject.getJSONObject("download_link");
-
-                upDate = jsonFinalObject.getString("date");
-                newdskyver = jsondsky.getString("version");
-                newBiliver = jsonbili.getString("version");
-                sideAURL = jsonDownloadObject.getString("a");
-                sideBURL = jsonDownloadObject.getString("b");
-                noticeURL = jsonFinalObject.getString("changelog");
-                langByte = jsonFinalObject.getString("langSize");
-                textesByte = jsonFinalObject.getString("textesSize");
-
-                DownloadText noticeDown = new DownloadText("posts.json", 1);
-                noticeDown.execute(noticeURL);
-
-                //noticeURL = nojsonObject.getString("link");
-
-                //noticeParser nparser = new noticeParser();
-                //nparser.execute(noticeURL);
-
-            }catch(IOException e) {
-                e.printStackTrace();
-            }
-
-            /*FileReader fr = new FileReader(versionFile);
-            BufferedReader bfr = new BufferedReader(fr);
-
-            upDate = bfr.readLine();
-            CurrentVersion = bfr.readLine();
-            sideAURL = bfr.readLine();
-            sideBURL = bfr.readLine();
-            notice = bfr.readLine();
-            String jsonString = getStringFromUrl*/
-
+        if (id == R.id.nav_textpatch) {
+            fragment = new TextPatchFragment();
+            currentFragmentPosition = 0;
+        } else if (id == R.id.nav_guipatch) {
+            fragment = new GuiDownloadFragment();
+            currentFragmentPosition = 1;
+        } else if (id == R.id.nav_additional) {
+            fragment = new AddonsFragment();
+            currentFragmentPosition = 2;
+        } else if (id == R.id.nav_info) {
+            okMsgBox(getString(R.string.msgbox_appInfo), appInfo);
+        } else if (id == R.id.nav_gofrozen) {
+            Intent goFrozenIntent = new Intent(Intent.ACTION_VIEW);
+            goFrozenIntent.setData(Uri.parse(urls.patchSite));
+            startActivity(goFrozenIntent);
         }
-        catch(Exception e){
-            AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("오류").setMessage("버전 정보를 받아올 수 없습니다.\n" + e.getMessage());
-            builder.setPositiveButton("확인", new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
+
+        if (fragment != null) {
+            fragmentTransaction.replace(R.id.content_fragment_layout, fragment);
+            fragmentTransaction.commit();
+        }
+
+        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1000:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    return;
+                } else {
                     finish();
                     System.exit(0);
                 }
-            });
-            builder.show();
+                break;
         }
     }
 
-    public void parsingFunc()
-    {
-        try {
-            File noticeFile = new File(downloadAddr, "posts.json");
+    @Override
+    public void onResume() {
+        super.onResume();
+        IntentFilter completeFilter = new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE);
+        registerReceiver(completeReceiver, completeFilter);
+    }
 
-            InputStream istream = new FileInputStream(noticeFile);
-            int jsonSize = istream.available();
-            byte[] jsonBuf = new byte[jsonSize];
-            istream.read(jsonBuf);
-            istream.close();
-            String jsonString = new String(jsonBuf, "UTF-8");
+    @Override
+    public void onPause() {
+        super.onPause();
+        unregisterReceiver(completeReceiver);
+    }
 
-            //jsonString.replace("[", "");
-            //jsonString.replace("]", "");
-            JSONArray jsonArray = new JSONArray(jsonString);
-            JSONObject nojsonObject = jsonArray.getJSONObject(0);
-            JSONObject guidObject = nojsonObject.getJSONObject("content");
-            notice = guidObject.getString("rendered");
-            notice = notice.replace("<p>", "");
-            notice = notice.replace("<strong>", "");
-            notice = notice.replace("</p>", "\n");
-            notice = notice.replace("</strong>", "");
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        this.finish();
+    }
 
-            TextView nos = (TextView) findViewById(R.id.text_notice);
-            nos.setText(notice);
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(TypekitContextWrapper.wrap(newBase));
+    }
 
-            TextView contex = (TextView) findViewById(R.id.text_curDate);
-            TextView newdsky = (TextView) findViewById(R.id.text_newdsky);
-            TextView newBili = (TextView) findViewById(R.id.text_newBili);
-            TextView noticetex = (TextView) findViewById(R.id.text_notice);
-            TextView dskytex = (TextView) findViewById(R.id.text_dskyVersion);
-            TextView bilitex = (TextView) findViewById(R.id.text_biliVersion);
-
-            Double showSizeL = Double.parseDouble(langByte);
-            Double showSizeT = Double.parseDouble(textesByte);
-            contex.setText(upDate);// + "(" + showSizeL.toString() + "Byte, " + showSizeT.toString() + "Byte)");
-            noticetex.setText(notice);
-            newdsky.setText(newdskyver);
-            newBili.setText(newBiliver);
-
-            String verTemp;
-
-            if(isInstalled("com.digitalsky.girlsfrontline.cn", this))
-            {
-                candsky = true;
-                verTemp = getVersion("com.digitalsky.girlsfrontline.cn", this);
-                if(verTemp.equals(newdskyver))
-                {
-                    dskytex.setTextColor(Color.BLUE);
-                }
-                else
-                {
-                    dskytex.setTextColor(Color.RED);
-                }
-                dskytex.setText(verTemp);
+    public void changeIcon(int index) {
+        if (index != iconType) {
+            int i;
+            for (i = 0; i < components.length; i++)
+                getPackageManager().setComponentEnabledSetting(new ComponentName("team.hatsan.grlfonkorpatcher", components[i]), PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+            switch (index) {
+                case 0:
+                    getPackageManager().setComponentEnabledSetting(new ComponentName("team.hatsan.grlfonkorpatcher", components[index]), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                    break;
+                case 1:
+                    getPackageManager().setComponentEnabledSetting(new ComponentName("team.hatsan.grlfonkorpatcher", components[index]), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                    break;
+                case 2:
+                    getPackageManager().setComponentEnabledSetting(new ComponentName("team.hatsan.grlfonkorpatcher", components[index]), PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+                    break;
             }
-            else
-            {
-                dskytex.setTextColor(Color.RED);
-                dskytex.setText("미설치");
-            }
-            if(isInstalled("com.digitalsky.girlsfrontline.cn.bili", this))
-            {
-                canBili = true;
-                verTemp = getVersion("com.digitalsky.girlsfrontline.cn.bili", this);
-                if(verTemp.equals(newBiliver))
-                {
-                    bilitex.setTextColor(Color.BLUE);
-                }
-                else
-                {
-                    bilitex.setTextColor(Color.RED);
-                }
-                bilitex.setText(verTemp);
-            }
-            else
-            {
-                bilitex.setTextColor(Color.RED);
-                bilitex.setText("미설치");
-            }
-
-            loadingBar.dismiss();
+            iconType = index;
+            SharedPreferences.Editor editor = settings.edit();
+            editor.putInt("icon", iconType);
+            editor.commit();
         }
-        catch(Exception e)
+    }
+
+    // 설정하는 구간
+    // ------------------------------------------------------------
+
+    public void callHelp(int pos) {
+        Intent intent = new Intent(getApplicationContext(), HelpActivity.class);
+        intent.putExtra("page", pos);
+        startActivity(intent);
+    }
+
+    public void askAgree(final boolean first) {
+        final SharedPreferences.Editor editor = settings.edit();
+
+        AlertDialog.Builder askPush = new AlertDialog.Builder(this);
+        askPush.setTitle(getString(R.string.yesnobox_title_askAgreePush));
+        askPush.setMessage(getString(R.string.yesnobox_desc_askAgreePush));
+        if (first) {
+            askPush.setMessage(getString(R.string.yesnobox_desc_firstAskAgreePush));
+        }
+        askPush.setPositiveButton(getString(R.string.yesnobox_yes_btn), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                okMsgBox("", getString(R.string.msgbox_agreePush));
+                FirebaseMessaging.getInstance().subscribeToTopic("notice");
+                editor.putInt("push", 0);
+                editor.commit();
+                if (first) {
+                    askUpdate();
+                }
+            }
+        });
+        askPush.setNegativeButton(getString(R.string.yesnobox_no_btn), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                okMsgBox("", getString(R.string.msgbox_denyPush));
+                FirebaseMessaging.getInstance().unsubscribeFromTopic("notice");
+                editor.putInt("push", 1);
+                editor.commit();
+                if (first) {
+                    askUpdate();
+                }
+            }
+        });
+        askPush.show();
+    }
+
+    public void askUpdate() {
+        if (bShowUmbUpdateBox && bSuccessConnect) {
+            final SharedPreferences.Editor editor = settings.edit();
+            try {
+                if (!(getPackageManager().getPackageInfo(getPackageName(), 0).versionName.equals(versions.latestUmb))) {
+                    LayoutInflater inflater = LayoutInflater.from(this);
+                    View checkLayout = inflater.inflate(R.layout.checkbox_layout, null);
+                    final CheckBox cbox = (CheckBox) checkLayout.findViewById(R.id.check_oneTime);
+
+                    AlertDialog.Builder askUpdate = new AlertDialog.Builder(this);
+                    askUpdate.setNegativeButton(getString(R.string.yesnobox_no_btn), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            editor.putBoolean("showUpdate", !(cbox.isChecked()));
+                            editor.commit();
+                        }
+                    });
+                    askUpdate.setPositiveButton(getString(R.string.yesnobox_yes_btn), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            editor.putBoolean("showUpdate", !(cbox.isChecked()));
+                            editor.commit();
+                            startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(umbURL)));
+                        }
+                    });
+                    askUpdate.setTitle(getString(R.string.yesnobox_title_askUpdate));
+                    askUpdate.setMessage(getString(R.string.yesnobox_desc_askUpdate));
+                    askUpdate.setView(checkLayout);
+                    askUpdate.show();
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void refresh() {
+        refreshBar.show();
+        iconType = settings.getInt("icon", 0);
+        agreePush = settings.getInt("push", -1);
+        bShowUmbUpdateBox = settings.getBoolean("showUpdate", true);
+        bCustomServer = settings.getBoolean("useCustomServer", false);
+        customJSONURL = settings.getString("customURL", "");
+
+        bSuccessConnect = true;
+
+        if (bCustomServer) {
+            urls.checkJSON = customJSONURL;
+        } else {
+            urls.checkJSON = getString(R.string.request_URL);
+        }
+        File checkJSONFile = new File(directories.forDownload, "check.json");
+        checkJSONFile.delete();
+        DownloadTask downloadTask = new DownloadTask(this, "check.json", getExternalCacheDir().toString(), false, "REFRESH_FILE", null);
+        downloadTask.execute(urls.checkJSON);
+    }
+
+    public void requestNotice() {
+        DownloadTask downloadTask = new DownloadTask(this, "posts_text.json", directories.forDownload, false, "TEXT_NOTICE_FILE", null);
+        downloadTask.execute(urls.textNoticeJSON);
+    }
+
+    public void checkPermission() { // 저장소 권한 확인 및 요청 함수
+        int currentPermission = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (currentPermission == PackageManager.PERMISSION_DENIED) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    AlertDialog.Builder askContinue = new AlertDialog.Builder(this);
+                    askContinue.setTitle(getString(R.string.yesnobox_title_requestPermission));
+                    askContinue.setMessage(getString(R.string.yesnobox_desc_requestPermission));
+                    askContinue.setPositiveButton(getString(R.string.yesnobox_yes_btn), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+                            }
+                            dialog.dismiss();
+                        }
+                    });
+                    askContinue.setNegativeButton(getString(R.string.yesnobox_no_btn), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            finish();
+                            System.exit(0);
+                        }
+                    });
+                    askContinue.show();
+                } else {
+                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
+                }
+                return;
+            }
+        }
+    }
+
+    public boolean checkMatchFileSize(platformType platform, int side) { //0 : A, 1 : B
+        File languageFile = new File(directories.forPatch[getPlatformIndex(platform)], patchFileType[0]);
+        File textesFile = new File(directories.forPatch[getPlatformIndex(platform)], patchFileType[1]);
+        String languageFileSize = "";
+        String textesFileSize = "";
+
+        switch(side){
+            case 0:
+                languageFileSize = sideA.langSize;
+                textesFileSize = sideA.textesSize;
+                break;
+            case 1:
+                languageFileSize = sideB.langSize;
+                textesFileSize = sideB.textesSize;
+                break;
+        }
+
+        if (languageFile.exists() && textesFile.exists()) {
+            Long langSize = languageFile.length();
+            Long textesSize = textesFile.length();
+            if (languageFileSize.equals(langSize.toString()) && textesFileSize.equals(textesSize.toString())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public void initProgressDialog() {
+        refreshBar = new ProgressDialog(this);
+        refreshBar.setCancelable(false);
+        refreshBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        refreshBar.setMessage(getString(R.string.progressdialog_refresh));
+
+        downloadBar = new ProgressDialog(this);
+        downloadBar.setIndeterminate(true);
+        downloadBar.setCancelable(false);
+    }
+
+    public void preparePatch(platformType p) {
+        final platformType platform = p;
+        AlertDialog.Builder askSide = new AlertDialog.Builder(this);
+        askSide.setTitle(getString(R.string.yesnobox_title_askSide));
+        askSide.setMessage(Html.fromHtml(patchMessage));
+        if (!oneSideMode) {
+            askSide.setPositiveButton(btn_sideA, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    patch(platform, 0);
+                    dialog.dismiss();
+                }
+            });
+            askSide.setNegativeButton(btn_sideB, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    patch(platform, 1);
+                    dialog.dismiss();
+                }
+            });
+        } else {
+            askSide.setPositiveButton(getString(R.string.yesnobox_yes_btn), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    patch(platform, 0);
+                    dialog.dismiss();
+                }
+            });
+            askSide.setNegativeButton(getString(R.string.yesnobox_no_btn), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+        }
+        askSide.show();
+    }
+
+    public void patch(platformType p, int side) { // 0 : A, 1 : B
+        if(checkMatchFileSize(p, side)) {
+            DownloadTask downloadTask = new DownloadTask(this, "patch.zip", directories.forDownload, true, "PATCH_FILE", p);
+            setDownloadBar("", getString(R.string.progressdialog_patchDownload), ProgressDialog.STYLE_HORIZONTAL);
+            if (side == 0) {
+                downloadTask.execute(urls.sideA);
+            } else {
+                downloadTask.execute(urls.sideB);
+            }
+        }
+        else
+        {
+            okMsgBox(getString(R.string.msgbox_title_notmatchSize), getString(R.string.msgbox_desc_notmatchSize));
+        }
+    }
+
+    public void apkDownload(platformType p){
+        DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+        DownloadManager.Request request;
+        Uri apkUrl;
+
+        String apkName = (new File(urls.apks[getPlatformIndex(p)])).getName();
+        String[] realApkName = apkName.split("[.]");
+        File apkF = new File(Environment.getExternalStorageDirectory().toString() + "/" + Environment.DIRECTORY_DOWNLOADS, realApkName[0] + ".apk");
+        if(apkF.exists()) {
+            apkF.delete();
+        }
+
+        if(latestID != -1)
+        {
+            downloadManager.remove(latestID);
+        }
+
+        apkUrl = Uri.parse(urls.apks[getPlatformIndex(p)]);
+        List<String> path = apkUrl.getPathSegments();
+        request = new DownloadManager.Request(apkUrl);
+        request.setTitle(getString(R.string.downloadManager_title));
+        request.setDescription(p.toString());
+        request.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, path.get(path.size()-1));
+        Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS).mkdirs();
+        latestID = downloadManager.enqueue(request);
+        lastPlatformType = p;
+        Toast.makeText(this, getString(R.string.toast_apkWarning), Toast.LENGTH_LONG).show();
+        //startActivity(new Intent(DownloadManager.ACTION_VIEW_DOWNLOADS));
+    }
+
+    BroadcastReceiver completeReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String apkName = (new File(urls.apks[getPlatformIndex(lastPlatformType)])).getName();
+            String[] realApkName = apkName.split("[.]");
+            File apkF = new File(Environment.getExternalStorageDirectory().toString() + "/" + Environment.DIRECTORY_DOWNLOADS, realApkName[0] + ".apk");
+            installApk(apkF);
+        }
+    };
+
+    public void installApk(File apkFile){
+        Uri apkUri = Uri.fromFile(apkFile);
+        try{
+            Intent installer = new Intent(Intent.ACTION_VIEW);
+            installer.setDataAndType(apkUri, "application/vnd.android.package-archive");
+            startActivity(installer);
+        }catch(Exception e)
         {
             e.printStackTrace();
         }
     }
 
-    public void writeF(InputStream in, OutputStream ou) throws IOException
-    {
-        int data = 0;
-        while((data = in.read()) != -1)
-        {
-            ou.write(data);
-        }
-        ou.flush();
+    public void forceStop() {
+        AlertDialog.Builder askForceStop = new AlertDialog.Builder(this);
+        askForceStop.setTitle(getString(R.string.yesnobox_title_askForceStop));
+        askForceStop.setMessage(getString(R.string.yesnobox_desc_askForceStop));
+        askForceStop.setPositiveButton(getString(R.string.yesnobox_yes_btn), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                DownloadManager downloadManager = (DownloadManager)getSystemService(Context.DOWNLOAD_SERVICE);
+                if(latestID != -1)
+                {
+                    downloadManager.remove(latestID);
+                }
+                dialog.dismiss();
+            }
+        });
+        askForceStop.setNegativeButton(getString(R.string.yesnobox_no_btn), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        askForceStop.show();
     }
 
-    public boolean isInstalled(String packName, Context con)
-    {
-        PackageManager pm = con.getPackageManager();
+    public void unInstallPackage(platformType p){
+        try{
+            if(isInstalled(getPlatformPackageName(p))){
+                Uri packageUri = Uri.parse("package:" + getPlatformPackageName(p));
+                Intent unInstallIntent = new Intent(Intent.ACTION_DELETE, packageUri);
+                startActivity(unInstallIntent);
+                return;
+            }
+            okMsgBox(getString(R.string.msgbox_title_noPackage), getString(R.string.msgbox_desc_noPackage));
+        }catch(Exception e){
+        }
+    }
+
+    public void deletePatch(platformType p){
+        File langFile = new File(directories.forPatch[getPlatformIndex(p)], patchFileType[0]);
+        File textesFile = new File(directories.forPatch[getPlatformIndex(p)], patchFileType[1]);
+
+        if(langFile.exists() | textesFile.exists()){
+            if(langFile.exists())
+                langFile.delete();
+            if(textesFile.exists())
+                textesFile.delete();
+            okMsgBox(getString(R.string.msgbox_title_doneDeletePatch), getString(R.string.msgbox_desc_doneDeletePatch));
+            return;
+        }
+        okMsgBox(getString(R.string.msgbox_title_failedDeletePatch), getString(R.string.msgbox_desc_failedDeletePatch));
+    }
+
+    public boolean isInstalled(String packName) {
+        PackageManager pm = this.getPackageManager();
         try{
             pm.getPackageInfo(packName, PackageManager.GET_ACTIVITIES);
             return true;
@@ -318,374 +651,397 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-    public String getVersion(String packName, Context con)
-    {
-        PackageManager pm = con.getPackageManager();
+    public void unCensored(platformType p){
+        uncensorSource usource = new uncensorSource();
+        switch(p)
+        {
+            case DIGITALSKY:
+                usource.noMosaicPatch("mica");
+                break;
+            case BILIBILI:
+                usource.noMosaicPatch("bili");
+                break;
+        }
+    }
+
+    public class uncensorSource{ //by 류하/Ather
+        private String TEMP_PATH = android.os.Environment.getExternalStorageDirectory().getAbsolutePath();
+
+        void noMosaicPatch(String flag){
+            BufferedReader reader, reader1;
+            if(flag.equals("mica")){ //mica
+                try{
+                    execute("chmod 777 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.xml");
+                    //reader = execute("cd data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs\nls -al");
+                    String micaPath = "data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.xml";
+                    reader = execute("cat " + micaPath);
+                    String output, sTemp = "";
+                    StringBuffer buffer = new StringBuffer();
+                    while((output = reader.readLine())!=null){
+                        if(output.contains("int name=\"Normal\"")){
+                            StringBuilder temp = new StringBuilder(output);
+                            temp.setCharAt(30, '1');
+                            //Log.d("check", temp.toString() + " && " + output);
+                            output = temp.toString();
+                        }
+                        buffer.append(output);
+                        buffer.append("\n");
+                    }
+                    reader.close();
+                    //Log.d("output", buffer.toString());
+
+                    //file change
+                    writeFile(micaPath, buffer.toString());
+                    execute("chmod 440 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.xml");
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+            else{ //bili
+                try{
+                    execute("chmod 777 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.xml");
+                    //reader = execute("cd data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs\nls -al");
+                    String biliPath = "data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.xml";
+                    reader = execute("cat " + biliPath);
+                    String output, sTemp = "";
+                    StringBuffer buffer = new StringBuffer();
+                    while((output = reader.readLine())!=null){
+                        if(output.contains("int name=\"Normal\"")){
+                            StringBuilder temp = new StringBuilder(output);
+                            temp.setCharAt(30, '1');
+                            //Log.d("check", temp.toString() + " && " + output);
+                            output = temp.toString();
+                        }
+                        buffer.append(output);
+                        buffer.append("\n");
+                    }
+                    reader.close();
+                    //Log.d("output", buffer.toString());
+
+                    //file change
+                    writeFile(biliPath, buffer.toString());
+                    execute("chmod 440 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.xml");
+                }
+                catch(Exception e){
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        public BufferedReader execute(String cmd){
+            BufferedReader reader = null; //errReader = null;
+            try {
+                Process process = Runtime.getRuntime().exec("su");
+                DataOutputStream os = new DataOutputStream(process.getOutputStream());
+                os.writeBytes(cmd + "\n");
+                os.writeBytes("exit\n");
+                reader = new BufferedReader(new InputStreamReader(process.getInputStream()));
+                String err = (new BufferedReader(new InputStreamReader(process.getErrorStream()))).readLine();
+                os.flush();
+
+                if (process.waitFor() != 0 || (!"".equals(err) && null != err)) {
+                    Log.e("920TERoot", err);
+                    okMsgBox(getString(R.string.msgbox_title_nonRooting), getString(R.string.msgbox_desc_nonRooting));
+                    return null;
+                }
+                return reader;
+            } catch(Exception e){
+                e.printStackTrace();
+                okMsgBox(getString(R.string.msgbox_title_nonRooting), getString(R.string.msgbox_desc_nonRooting));
+            }
+            return null;
+        }
+
+        public boolean writeFile(String path, String text){
+            try{
+                File file = new File(path);
+                String tempFile = TEMP_PATH + "/.tempPath";
+                String fileString = path;
+                if(!file.canWrite()){
+                    fileString = tempFile;
+                }
+                BufferedWriter bw = null;
+                bw = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(fileString), Charset.forName("UTF-8")));
+                bw.write(text);
+                bw.close();
+                BufferedReader ret = execute("ls " + getCmdPath(fileString) + " " + getCmdPath(path));
+                if(ret == null){
+                    return false;
+                }
+                return true;
+            }
+            catch(Exception e){
+                e.printStackTrace();
+                return false;
+            }
+        }
+
+        public String getCmdPath(String path){
+            return path.replace(" ", "\\ ").replace("'", "\\'");
+        }
+    }
+
+    //Call-Back 함수 구간
+    // -----------------------------------------------------------
+
+    public void callbackRefresh(){ // Refresh 호출 후 check.json 받은 후 호출되는 콜백 함수
         try{
-            PackageInfo pi = pm.getPackageInfo(packName, PackageManager.GET_ACTIVITIES);
-            return pi.versionName;
-        }catch(PackageManager.NameNotFoundException e)
-        {
-            e.printStackTrace();
-            return "";
-        }
-    }
-
-    public void deletePatch(View v)
-    {
-        isInstalledv = false;
-        //deleteType = -1; //DigitalSky = 0, BiliBili = 1
-        final AlertDialog.Builder isBiliDsky = new AlertDialog.Builder(this);
-        isBiliDsky.setTitle("플랫폼 선택");
-        isBiliDsky.setMessage("한글패치를 삭제할 플랫폼을 선택해주세요.");
-        isBiliDsky.setNegativeButton("운영사", new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if(candsky)
-                {
-                    isInstalledv = true;
-                    deleteType = 0;
-                    dialog.dismiss();
-                }
-                prePatchDelete(isInstalledv, deleteType);
-            }
-        });
-        isBiliDsky.setPositiveButton("비리비리", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                if(canBili)
-                {
-                    isInstalledv = true;
-                    deleteType = 1;
-                    dialog.dismiss();
-                }
-                prePatchDelete(isInstalledv, deleteType);
-            }
-        });
-        isBiliDsky.show();
-    }
-
-    public void prePatchDelete(boolean b, int i)
-    {
-        AlertDialog.Builder isConfirm = new AlertDialog.Builder(this);
-        if(isInstalledv)
-        {
-            isConfirm.setTitle("확인");
-            isConfirm.setTitle("한글패치를 제거합니다. 진행하시겠습니까?");
-            isConfirm.setPositiveButton("아니오", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-            isConfirm.setNegativeButton("예", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    postdeletePatch(deleteType);
-                    dialog.dismiss();
-                }
-            });
-        }
-        else
-        {
-            isConfirm.setTitle("패키지 없음");
-            isConfirm.setMessage("해당 플랫폼의 소녀전선 앱이 설치되어 있지 않습니다.");
-            isConfirm.setPositiveButton("확인", new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-                }
-            });
-        }
-        isConfirm.show();
-    }
-
-    public void postdeletePatch(int i)
-    {
-        File langs;
-        File texts;
-        String temp_Targetaddr = null;
-        switch(i)
-        {
-            case 0:
-                temp_Targetaddr = Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn/files/Android/";
-                break;
-            case 1:
-                temp_Targetaddr = Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn.bili/files/Android/";
-                break;
-        }
-        langs = new File(temp_Targetaddr, "asset_language.ab");
-        texts = new File(temp_Targetaddr, "asset_textes.ab");
-        if(langs.exists())
-        {
-            langs.delete();
-        }
-        if(texts.exists())
-        {
-            texts.delete();
-        }
-
-        AlertDialog.Builder doneDelete = new AlertDialog.Builder(this);
-        doneDelete.setTitle("제거 완료");
-        doneDelete.setMessage("한글 패치가 제거되었습니다.\n게임에 재접속하여 텍스트 데이터를 다시 받아주세요.");
-        doneDelete.setPositiveButton("확인", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        doneDelete.show();
-    }
-
-    public void patchbili(View v)
-    {
-        if(canBili) {
-            targetAddr = Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn.bili/files/Android/";
-            if (checkFiles() && checkSize(targetAddr)) {
-                patch();
-            }
-        }
-    }
-
-    public void patchdsky(View v)
-    {
-        if(candsky) {
-            targetAddr = Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn/files/Android/";
-            if (checkFiles() && checkSize(targetAddr)) {
-                patch();
-            }
-        }
-    }
-
-    public boolean checkSize(String packAddr)
-    {
-        File langFile = new File(packAddr, "asset_language.ab");
-        File textesFile = new File(packAddr, "asset_textes.ab");
-        if(langFile.exists() && textesFile.exists())
-        {
-            Long langSize = langFile.length();
-            Long textesSize = textesFile.length();
-            String langSizeStr = langSize.toString();
-            String textesSizeStr = textesSize.toString();
-
-            if(langSizeStr.equals(langByte) && textesSizeStr.equals(textesByte))
-            {
-                return true;
-            }
-        }
-        AlertDialog.Builder alertSize = new AlertDialog.Builder(this);
-        alertSize.setTitle("파일 체크 오류");
-        alertSize.setMessage("데이터 파일이 없거나 서버와 일치하지 않습니다.\n데이터 파일을 받으시거나 서버가 대응중인지 확인해주세요.");
-        alertSize.setPositiveButton("확인", new DialogInterface.OnClickListener(){
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.dismiss();
-            }
-        });
-        alertSize.show();
-        return false;
-    }
-
-    public void checkPer()
-    {
-        int permissioncheck = ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (permissioncheck == PackageManager.PERMISSION_DENIED) {
-                if(shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE))
-                {
-                    AlertDialog.Builder alertPer = new AlertDialog.Builder(this);
-                    alertPer.setTitle("권한 요청").setMessage("패치를 위해서는 단말기의 저장 권한을 필요로 합니다.\n계속하시겠습니까?");
-                    alertPer.setPositiveButton("예", new DialogInterface.OnClickListener(){
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
-                            }
-                            dialog.dismiss();
-                        }
-                    });
-                    alertPer.setNegativeButton("아니요", new DialogInterface.OnClickListener(){
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            dialog.dismiss();
-                            finish();
-                            System.exit(0);
-                        }
-                    });
-                    alertPer.show();
-                }
-                else
-                {
-                    requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1000);
-                }
-            }
-            else
-            {
-                afterPer();
-            }
-        }
-        else {
-            afterPer();
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults)
-    {
-        switch(requestCode)
-        {
-            case 1000:
-                if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED)
-                {
-                    afterPer();
-                }
-                else
-                {
-                    finish();
-                    System.exit(0);
-                }
-        }
-    }
-
-
-    public boolean checkFiles()
-    {
-        File langFile = new File(targetAddr, "asset_language.ab");
-        File textFile = new File(targetAddr, "asset_textes.ab");
-
-        if(langFile.exists())
-        {
-            if(textFile.exists())
-            {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    public void patch()
-    {
-        AlertDialog.Builder sideAlert = new AlertDialog.Builder(this);
-
-        sideAlert.setTitle("Side 선택");
-        sideAlert.setMessage("패치 Side를 선택해주세요\nA Side : 메인 스토리\nB Side : 이벤트 스토리/가구 설명\n외에는 전부 동일.");
-        sideAlert.setNegativeButton("A Side", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                selectedURL = sideAURL;
-                dialog.dismiss();
-                prog();
-            }
-        });
-        sideAlert.setPositiveButton("B Side", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                selectedURL = sideBURL;
-                dialog.dismiss();
-                prog();
-            }
-        });
-        //AlertDialog dialog = sideAlert.create();
-        sideAlert.show();
-    }
-
-    public void prog() {
-        pbar = new ProgressDialog(MainActivity.this);
-        pbar.setMessage("패치파일 다운로드 중");
-        pbar.setProgressStyle(ProgressDialog.STYLE_HORIZONTAL);
-        pbar.setIndeterminate(true);
-        pbar.setCancelable(false);
-
-        DownloadTask dtask = new DownloadTask(this);
-        dtask.execute(selectedURL);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
-    private class DownloadText extends AsyncTask<String, String, Long>{
-        private Context context;
-        String downFileName;
-        int call;
-
-        public DownloadText(String Fname, int i){
-            downFileName = Fname;
-            call = i;
-        }
-
-        @Override
-        protected Long doInBackground(String... urls) {
-            int count;
-            long FileSize = -1;
-            InputStream inStream = null;
-            OutputStream outStream = null;
-            URLConnection URLCon = null;
+            File checkJSONFile = new File(directories.forDownload, "check.json");
 
             try{
-                URL url = new URL(urls[0]);
-                URLCon = url.openConnection();
-                URLCon.connect();
+                String vanillaString = null;
+                InputStream inputStream = new FileInputStream(checkJSONFile);
+                int fileSize = inputStream.available();
+                byte[] buffer = new byte[fileSize];
+                inputStream.read(buffer);
+                inputStream.close();
+                vanillaString = new String(buffer, "UTF-8");
 
-                FileSize = URLCon.getContentLength();
+                JSONObject blockAndroid = new JSONObject(vanillaString).getJSONObject("app_version").getJSONObject("android");
+                JSONObject blockguiroot = blockAndroid.getJSONObject("gui");
+                JSONObject[] blockguis = {blockguiroot.getJSONObject("gui_digitalsky"), blockguiroot.getJSONObject("gui_bilibili")};
+                JSONObject blocktext = blockAndroid.getJSONObject("text");
+                JSONObject blockUmb = blockAndroid.getJSONObject("umb");
+                JSONObject blockSideA = blocktext.getJSONObject("a");
+                JSONObject blockSideB = blocktext.getJSONObject("b");
 
-                inStream = new BufferedInputStream(url.openStream(), 8192);
-                File resultFiles = new File(downloadAddr, downFileName);
-                if(resultFiles.exists())
-                {
-                    resultFiles.delete();
+                urls.apks = new String[2];
+                urls.apks[getPlatformIndex(platformType.DIGITALSKY)] = blockguis[0].getString("download_link");
+                urls.apks[getPlatformIndex(platformType.BILIBILI)] = blockguis[1].getString("download_link");
+
+                versions.latestDigitalSky = blockguis[0].getString("version");
+                versions.latestBiliBili = blockguis[1].getString("version");
+                versions.latestUmb = blockUmb.getString("version");
+
+                urls.guiNoticeJSON = blockguiroot.getString("changelog");
+
+                urls.sideA = blockSideA.getString("download_link");
+                urls.sideB = blockSideB.getString("download_link");
+                urls.patchSite = blockUmb.getString("patchSite");
+
+                textesChangeDate = blocktext.getString("date");
+
+                sideA.langSize = blockSideA.getString("langSize");
+                sideA.textesSize = blockSideA.getString("textesSize");
+                sideB.langSize = blockSideB.getString("langSize");
+                sideB.textesSize = blockSideB.getString("textesSize");
+
+                btn_sideA = blockSideA.getString("buttonText");
+                btn_sideB = blockSideB.getString("buttonText");
+
+                urls.textNoticeJSON = blocktext.getString("changelog");
+
+                umbURL = blockUmb.getString("download_link");
+
+                try {
+                    patchMessage = blockUmb.getString("patchMessage");
+                    oneSideMode = blockUmb.getBoolean("oneSideMode");
+                }catch(Exception e){
+                    oneSideMode = false;
+                    patchMessage = getString(R.string.yesnobox_desc_askSide);
                 }
-                outStream = new FileOutputStream(resultFiles);
 
-                byte data[] = new byte[1024];
-                long downloadedSize = 0;
-                while((count = inStream.read(data)) != -1)
-                {
-                    downloadedSize += count;
-                    outStream.write(data, 0, count);
-                }
+                appInfo = blockUmb.getString("appInfo");
 
-                outStream.flush();
-
-                outStream.close();
-                inStream.close();
-
-            }catch(Exception e) {
+            }catch(IOException e)
+            {
                 e.printStackTrace();
             }
-            return FileSize;
+        }catch(Exception e) {
+            AlertDialog.Builder failedGet = new AlertDialog.Builder(this);
+            failedGet.setTitle(getString(R.string.msgbox_title_failedget));
+            failedGet.setMessage(getString(R.string.msgbox_desc_failedget));
+            failedGet.setPositiveButton(getString(R.string.msgbox_ok_btn), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                    //finish();
+                    //System.exit(0);
+                }
+            });
+            failedGet.show();
+        }
+        requestNotice();
+    }
+
+    public void callbackRequestNotice(){ //공지사항 파일을 다 받은후 호출되는 콜백 함수
+        if(!firstTime) {
+            FragmentManager fragmentManager = getSupportFragmentManager();
+            FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+
+            int i;
+            for (i = 0; i < 3; i++) {
+                if (navigationView.getMenu().getItem(i).isChecked()) {
+                    onNavigationItemSelected(navigationView.getMenu().getItem(i));
+                    break;
+                }
+            }
+        }else{
+            onNavigationItemSelected(navigationView.getMenu().getItem(0));
+        }
+        refreshBar.dismiss();
+    }
+
+    public void callbackPatch(platformType p){
+        int platform = getPlatformIndex(p);
+        setDownloadBar("", getString(R.string.progressdialog_moveFiles), ProgressDialog.STYLE_SPINNER);
+
+        File patchZipFile = new File(directories.forDownload, "patch.zip");
+        String forUnzip = directories.forDownload + "/unzip/";
+
+        File newLagFile = new File(forUnzip, patchFileType[0]);
+        File newTextesFile = new File(forUnzip, patchFileType[1]);
+
+        if(newLagFile.exists()){
+            newLagFile.delete();
+        }
+        if(newTextesFile.exists()){
+            newTextesFile.delete();
         }
 
-        @Override
-        protected void onPostExecute(Long aLong) {
-            super.onPostExecute(aLong);
-            switch(call)
-            {
-                case 0:
-                    getText();
-                    break;
-                case 1:
-                    parsingFunc();
-                    break;
-            }
+        Decompress decompress = new Decompress(patchZipFile.toString(), forUnzip);
+        decompress.unzip();
+
+        File targetLangFile = new File(directories.forPatch[platform], patchFileType[0]);
+        File targetTextesFile = new File(directories.forPatch[platform], patchFileType[1]);
+
+        if(targetLangFile.exists())
+        {
+            targetLangFile.delete();
+        }
+        if(targetTextesFile.exists())
+        {
+            targetTextesFile.delete();
+        }
+
+        try{
+            FileInputStream inputStream = new FileInputStream(newLagFile);
+            FileOutputStream outputStream = new FileOutputStream(targetLangFile);
+
+            FileChannel fcin = inputStream.getChannel();
+            FileChannel fcout = outputStream.getChannel();
+
+            long fileSize = fcin.size();
+            fcin.transferTo(0, fileSize, fcout);
+
+            inputStream = new FileInputStream(newTextesFile);
+            outputStream = new FileOutputStream(targetTextesFile);
+
+            fcin = inputStream.getChannel();
+            fcout = outputStream.getChannel();
+
+            fileSize = fcin.size();
+            fcin.transferTo(0, fileSize, fcout);
+
+            inputStream.close();
+            outputStream.close();
+            fcin.close();
+            fcout.close();
+
+            newLagFile.delete();
+            newTextesFile.delete();
+
+            okMsgBox(getString(R.string.msgbox_title_patchComplete), getString(R.string.msgbox_desc_patchComplete));
+        }catch(IOException e)
+        {
+            e.printStackTrace();
         }
     }
 
-    private class DownloadTask extends AsyncTask<String, String, Long> {
+    //getter, setter 구간
+    //------------------------------------------------------------
 
-        private Context context;
-
-        public DownloadTask(Context con)
+    public String getPlatformPackageName(platformType type) { //플랫폼별 패키지 이름 불러오기
+        switch(type)
         {
-            this.context = con;
+            case DIGITALSKY:
+                return platformPackageName[0];
+            case BILIBILI:
+                return platformPackageName[1];
+        }
+        return null;
+    }
+
+    public String getPlatformPackageVersion(platformType type){//플랫폼별 패키지 버전 받아오기, 설치되어 있으면 버전을 그렇지 않으면 null을 반환합니다.
+        PackageManager pm = getPackageManager();
+        switch (type) {
+            case DIGITALSKY:
+                try{
+                    return pm.getPackageInfo(getPlatformPackageName(platformType.DIGITALSKY), PackageManager.GET_ACTIVITIES).versionName;
+                }catch(PackageManager.NameNotFoundException e) {
+                    return getString(R.string.source_notInstalled);
+                }
+            case BILIBILI:
+                try{
+                    return pm.getPackageInfo(getPlatformPackageName(platformType.BILIBILI), PackageManager.GET_ACTIVITIES).versionName;
+                }catch(PackageManager.NameNotFoundException e) {
+                    return getString(R.string.source_notInstalled);
+                }
+        }
+        return getString(R.string.source_notInstalled);
+    }
+
+    public int getPlatformIndex(platformType p) {
+        if(p == platformType.DIGITALSKY)
+            return 0;
+        return 1;
+    }
+
+    public boolean getSuccessConnect(){
+        return bSuccessConnect;
+    }
+
+    public boolean getCustomServer() { return bCustomServer; }
+
+    public String getCustomServerURL() { return customJSONURL; }
+
+    // --------------------------------------------------------------
+
+    public void setDownloadBar(String title, String msg, int style) {
+        downloadBar.setMessage(msg);
+        downloadBar.setProgressStyle(style);
+    }
+
+    // --------------------------------------------------------------
+
+    public void okMsgBox(String title, String desc){ // OK 버튼만 존재하는 메시지박스를 출력
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(title);
+        builder.setMessage(desc);
+        builder.setPositiveButton(R.string.msgbox_ok_btn, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+        builder.show();
+    }
+
+    private class DownloadTask extends AsyncTask<String, String, Long> { //범용 다운로드 쓰레드
+        private Context context;
+        private String fileName;
+        private String targetFolder;
+        private String DownloadType; //PATCH_FILE, DATA_FILE, NORMAL
+        private File targetFile;
+        private boolean showProgressBar;
+        private platformType platform;
+
+        public DownloadTask(Context cons, String fName, String tFolder, boolean showPBar, String DownType, platformType p) { //현재 Context, 파일명, 다운 폴더, 프로그래스바 표시, 이후 처리용 다운로드 목적
+            context = cons;
+            fileName = fName;
+            targetFolder = tFolder;
+            showProgressBar = showPBar;
+            DownloadType = DownType;
+            platform = p;
         }
 
         @Override
         protected void onPreExecute() {
             super.onPreExecute();
-            pbar.show();
+            if (showProgressBar) {
+                downloadBar.show();
+            }
         }
 
         @Override
@@ -696,7 +1052,7 @@ public class MainActivity extends AppCompatActivity{
             OutputStream outStream = null;
             URLConnection URLCon = null;
 
-            try{
+            try {
                 URL url = new URL(urls[0]);
                 URLCon = url.openConnection();
                 URLCon.connect();
@@ -704,24 +1060,21 @@ public class MainActivity extends AppCompatActivity{
                 FileSize = URLCon.getContentLength();
 
                 inStream = new BufferedInputStream(url.openStream(), 8192);
-                resultAddr = new File(downloadAddr, "patch.zip");
-                if(resultAddr.exists())
-                {
-                    resultAddr.delete();
+                targetFile = new File(targetFolder, fileName);
+                if (targetFile.exists()) {
+                    targetFile.delete();
                 }
-                outStream = new FileOutputStream(resultAddr);
+                outStream = new FileOutputStream(targetFile);
 
                 byte data[] = new byte[1024];
                 long downloadedSize = 0;
-                while((count = inStream.read(data)) != -1){
+                while ((count = inStream.read(data)) != -1) {
                     downloadedSize += count;
-                    if(FileSize > 0)
-                    {
-                        double per = ((double)downloadedSize/FileSize) * 100;
-                        String meg = "다운로드 중\n" + (int)downloadedSize + "Byte / "+(int)FileSize + "Byte ("+ (int)per+"%)";
-                        publishProgress((int)((downloadedSize * 100) / FileSize) + "", meg);
+                    if (FileSize > 0) {
+                        double per = ((double) downloadedSize / FileSize) * 100;
+                        String meg = "Downloading\n" + (int) downloadedSize + "Byte / " + (int) FileSize + "Byte (" + (int) per + "%)";
+                        publishProgress((int) ((downloadedSize * 100) / FileSize) + "", meg);
                     }
-
                     outStream.write(data, 0, count);
                 }
 
@@ -730,8 +1083,9 @@ public class MainActivity extends AppCompatActivity{
                 outStream.close();
                 inStream.close();
 
-            }catch(Exception e){
-                Log.e("Error : ", e.getMessage());
+            } catch (Exception e) {
+                //Log.e("Error : ", e.getMessage());
+                bSuccessConnect = false;
             }
 
             return FileSize;
@@ -740,129 +1094,37 @@ public class MainActivity extends AppCompatActivity{
         @Override
         protected void onProgressUpdate(String... values) {
             super.onProgressUpdate(values);
-
-            pbar.setIndeterminate(false);
-            pbar.setMax(100);
-            pbar.setProgress(Integer.parseInt(values[0]));
-            pbar.setMessage(values[1]);
+            if (showProgressBar) {
+                downloadBar.setIndeterminate(false);
+                downloadBar.setMax(100);
+                downloadBar.setProgress(Integer.parseInt(values[0]));
+                downloadBar.setMessage(values[1]);
+            }
         }
 
         @Override
         protected void onPostExecute(Long aLong) {
             super.onPostExecute(aLong);
-            pbar.dismiss();
-            moveFiles(resultAddr.toString(), downloadAddr + "/unzip/");
-        }
-    }
-
-    public void moveFiles(String zipFile, String targetLoc){
-        File beforePatchlang = new File(targetLoc, "asset_language.ab");
-        File beforePatchtext = new File(targetLoc, "asset_textes.ab");
-        if(beforePatchlang.exists())
-        {
-            beforePatchlang.delete();
-        }
-        if(beforePatchtext.exists())
-        {
-            beforePatchtext.delete();
-        }
-        Decompress d = new Decompress(zipFile, targetLoc);
-        d.unzip();
-        File langFile = new File(targetAddr, "asset_language.ab");
-        File textFile = new File(targetAddr, "asset_textes.ab");
-        if(langFile.exists())
-        {
-            langFile.delete();
-        }
-        if(textFile.exists())
-        {
-            textFile.delete();
-        }
-        try{
-            FileInputStream inputStream = new FileInputStream(targetLoc + "asset_language.ab");
-            FileOutputStream outputStream = new FileOutputStream(targetAddr + "asset_language.ab");
-
-            FileChannel fcin = inputStream.getChannel();
-            FileChannel fcout = outputStream.getChannel();
-
-            long FSize = fcin.size();
-            fcin.transferTo(0, FSize, fcout);
-
-            inputStream = new FileInputStream(targetLoc + "asset_textes.ab");
-            outputStream = new FileOutputStream(targetAddr + "asset_textes.ab");
-
-            fcin = inputStream.getChannel();
-            fcout = outputStream.getChannel();
-
-            FSize = fcin.size();
-            fcin.transferTo(0, FSize, fcout);
-
-            fcin.close();
-            fcout.close();
-            inputStream.close();
-            outputStream.close();
-
-            if(beforePatchlang.exists())
-            {
-                beforePatchlang.delete();
+            if (showProgressBar)
+                downloadBar.dismiss();
+            switch (DownloadType) {
+                case "PATCH_FILE":
+                    callbackPatch(platform);
+                    break;
+                case "REFRESH_FILE":
+                    callbackRefresh();
+                    break;
+                case "TEXT_NOTICE_FILE":
+                    DownloadTask dTask = new DownloadTask(context, "posts_gui.json", directories.forDownload, false, "GUI_NOTICE_FILE", null);
+                    dTask.execute(urls.guiNoticeJSON);
+                    break;
+                case "GUI_NOTICE_FILE":
+                    callbackRequestNotice();
+                    break;
+                case "NORMAL":
+                default:
+                    break;
             }
-            if(beforePatchtext.exists())
-            {
-                beforePatchtext.delete();
-            }
-
-            AlertDialog.Builder alertEnd = new AlertDialog.Builder(this);
-            alertEnd.setTitle("패치 완료").setMessage("패치가 완료되었습니다.");
-            alertEnd.setPositiveButton("확인", new DialogInterface.OnClickListener(){
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.dismiss();
-            }
-            });
-
-            alertEnd.show();
-
-        }catch(Exception e) {
-            Log.e("move", e.getMessage());
-        }
-    }
-
-    private class noticeParser extends AsyncTask<String, String, Long>{
-
-        @Override
-        protected void onPreExecute() {
-            super.onPreExecute();
-            notice = "";
-        }
-
-        @Override
-        protected Long doInBackground(String... params) {
-            long size = 0;
-            try {
-                Document doc = Jsoup.connect(params[0]).get();
-                Elements elc = doc.select("div.entry-content p");
-
-                for(Element el : elc){
-                    notice += el + "\n";
-                }
-
-            }catch(Exception e)
-            {
-                e.printStackTrace();
-            }
-            return size;
-        }
-
-        @Override
-        protected void onPostExecute(Long aLong) {
-            super.onPostExecute(aLong);
-
-            TextView not = (TextView) findViewById(R.id.text_notice);
-            notice = notice.replace("<p>", "");
-            notice = notice.replace("<strong>", "");
-            notice = notice.replace("</p>", "");
-            notice = notice.replace("</strong>", "");
-            not.setText(notice);
         }
     }
 }

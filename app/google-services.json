@@ -1,27 +1,27 @@
 {
   "project_info": {
-    "project_number": "993550303553",
-    "firebase_url": "https://grlfonpatcher.firebaseio.com",
-    "project_id": "grlfonpatcher",
-    "storage_bucket": "grlfonpatcher.appspot.com"
+    "project_number": "549280650357",
+    "firebase_url": "https://umbproject-93de8.firebaseio.com",
+    "project_id": "umbproject-93de8",
+    "storage_bucket": "umbproject-93de8.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:993550303553:android:d4102181977c4cac",
+        "mobilesdk_app_id": "1:549280650357:android:d4102181977c4cac",
         "android_client_info": {
           "package_name": "team.hatsan.grlfonkorpatcher"
         }
       },
       "oauth_client": [
         {
-          "client_id": "993550303553-oqe2thtj79r1sq850m1bpisbfr1qvjo8.apps.googleusercontent.com",
+          "client_id": "549280650357-41ooar4fk6egq7k2lfa0vd2tci6051a1.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBrKeAETVaYet-qA7soWVuBkqUYXOZatYI"
+          "current_key": "AIzaSyAMD8YR6khqlXbyDQoNpq5KSxP3qlyHU3Y"
         }
       ],
       "services": {
