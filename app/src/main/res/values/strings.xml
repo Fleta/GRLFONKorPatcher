@@ -1,3 +1,128 @@
 <resources>
     <string name="app_name">우산</string>
+    <string name="banner_ad_unit_id" translatable="false">ca-app-pub-8020827438513908/5097328957</string>
+    <string name="request_URL" translatable="false">http://ftp.frozens.org/check32.json</string>
+    <string name="fronzens_URL" translatable="false">http://ddb.kirsi.moe/main.html#frozen</string>
+
+    <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
+    <string name="navigation_drawer_close" translatable="false">Close navigation drawer</string>
+
+    <string name="nav_menu_textpatch">텍스트 한글패치</string>
+    <string name="nav_menu_guidownload">GUIKR 다운로드</string>
+    <string name="nav_menu_additional">부가기능</string>
+    <string name="nav_menu_information">앱 정보</string>
+    <string name="nav_menu_gofrozen">한글패치 사이트로 이동</string>
+
+    <string name="progressdialog_refresh">서버로부터 데이터를 수신중입니다.\n잠시만 기다려주세요.</string>
+    <string name="progressdialog_patchDownload">패치에 필요한 파일을 다운로드 하는 중입니다.\n잠시만 기다려 주세요.</string>
+    <string name="progressdialog_moveFiles">패치를 적용중입니다.\n잠시만 기다려주세요.</string>
+
+    <string name="downloadManager_title">소녀전선 GUIKR</string>
+    <string name="downloadManager_desc"></string>
+
+    <string name="yesnobox_yes_btn">네</string>
+    <string name="yesnobox_no_btn">아니요</string>
+    <string name="yesnobox_sideA_btn">Side A</string>
+    <string name="yesnobox_sideB_btn">Side B</string>
+    <string name="yesnobox_dsky_btn">운영사</string>
+    <string name="yesnobox_bili_btn">비리비리</string>
+
+    <string name="yesnobox_title_requestPermission">권한 요청</string>
+    <string name="yesnobox_desc_requestPermission">소녀전선의 한글패치를 위해서는 단말기의 저장공간에 접근하는 권한이 필요합니다.\n계속하시겠습니까?</string>
+    <string name="yesnobox_title_askSide">패치 확인</string>
+    <string name="yesnobox_desc_askSide">적용을 원하시는 Side를 선택해주세요<![CDATA[<br>A Side : 메인 스토리 가능. <font color="#E60000">이벤트 진행 불가</font><br>B Side : 가구설명 표시 / 이벤트 스토리 가능. <font color="#E60000">메인 스토리 진행 불가</font><br>이외의 부분은 전부 동일합니다.]]></string>
+    <string name="yesnobox_title_askPlatform">플랫폼 선택</string>
+    <string name="yesnobox_desc_askPlatform">다운로드를 원하시는 플랫폼을 선택해주세요.<![CDATA[<br>주의! : <font color="#E60000">다중 다운로드는 지원되지 않습니다. 다운로드 중 새로 다운로드를 요청하면 진행중인 다운로드가 취소됩니다.</font>]]></string>
+    <string name="yesnobox_title_askForceStop">다운로드 강제 중단</string>
+    <string name="yesnobox_desc_askForceStop">다운로드를 강제 중단합니다. 계속하시겠습니까?</string>
+    <string name="yesnobox_title_askDeletePatchPlatform">플랫폼 선택</string>
+    <string name="yesnobox_desc_askDeletePatchPlatform">패치를 제거할 플랫폼을 선택해주세요.</string>
+    <string name="yesnobox_title_askUnCensored">플랫폼 선택</string>
+    <string name="yesnobox_desc_askUnCensored">검열해제 대상 플랫폼을 선택해주세요.<![CDATA[<br>주의 : <font color="#E60000">본 기능은 에뮬레이터 등을 이용하는 유저를 위한 편의 기능으로써 사용으로 발생하는 모든 문제에 대한 책임은 본인에게 있음을 주의해주세요.</font>]]></string>
+    <string name="yesnobox_title_askAgreePush">푸쉬 알림 동의</string>
+    <string name="yesnobox_desc_askAgreePush">TextKR / GUIKR 갱신 및 우산 앱 업데이트에 대한\n푸쉬 알림 수신에 동의하시겠습니까?(실험적 기능)</string>
+    <string name="yesnobox_desc_firstAskAgreePush">TextKR / GUIKR 갱신 및 우산 앱 업데이트에 대한\n푸쉬 알림 수신에 동의하시겠습니까?\n(추가기능 탭에서 재설정 가능, 실험적 기능)</string>
+    <string name="yesnobox_title_askUpdate">우산 업데이트</string>
+    <string name="yesnobox_desc_askUpdate">\n우산 앱이 업데이트 되었습니다!\n다운로드를 위해 한글패치 사이트로 이동하시겠습니까?\n(부가기능 탭에서도 확인하실 수 있습니다)\n</string>
+
+    <string name="msgbox_ok_btn">확인</string>
+
+    <string name="msgbox_title_failedget">오류</string>
+    <string name="msgbox_desc_failedget">데이터를 받아오는데 실패했습니다.</string>
+    <string name="msgbox_title_notmatchSize">파일 체크 오류</string>
+    <string name="msgbox_desc_notmatchSize">데이터 파일의 크기가 올바르지 않습니다.\n데이터 업데이트가 이루어지지 않았거나 업데이트 대응중인지 확인해주세요.</string>
+    <string name="msgbox_title_patchComplete">패치 완료</string>
+    <string name="msgbox_desc_patchComplete">한글 패치 적용이 완료되었습니다.</string>
+    <string name="msgbox_title_noPackage">오류</string>
+    <string name="msgbox_desc_noPackage">선택하신 플랫폼의 소녀전선 앱이 설치되어 있지 않습니다.</string>
+    <string name="msgbox_title_doneDeletePatch">제거 완료</string>
+    <string name="msgbox_desc_doneDeletePatch">패치 제거를 완료했습니다.</string>
+    <string name="msgbox_title_failedDeletePatch">제거 실패</string>
+    <string name="msgbox_desc_failedDeletePatch">패치 제거에 실패했습니다. 해당 파일을 찾을 수 없습니다.</string>
+    <string name="msgbox_title_nonRooting">오류</string>
+    <string name="msgbox_desc_nonRooting">루팅되지 않은 기기로는 해당 기능을 사용하실 수 없습니다.</string>
+    <string name="msgbox_title_doneUnCensored">적용 완료</string>
+    <string name="msgbox_desc_doneUnCensored">검열해제가 적용되었습니다.</string>
+    <string name="msgbox_agreePush">푸쉬 알림에 동의하셨습니다.</string>
+    <string name="msgbox_denyPush">푸쉬 알림을 거부하셨습니다.</string>
+    <string name="msgbox_appInfo">소녀전선 자동 패치 어플리케이션 - 우산</string>
+    <string name="msgbox_title_customURL">서버 변경</string>
+    <string name="msgbox_customURL">패치 정보를 받아올 서버를 입력해주세요.</string>
+
+    <string name="source_notInstalled">미설치</string>
+    <string name="toast_apkWarning">다운로드를 시작합니다. 다운로드가 완료되면 설치창이 뜹니다.\n네트워크 등의 문제로 다운로드가 멈췄을시에는 재시도 부탁드립니다.</string>
+    <string name="toast_lastPage">마지막 페이지입니다.</string>
+    <string name="toast_firstPage">첫번째 페이지입니다.</string>
+
+    <string name="xml_btn_apkDownload">소녀전선 GUIKR 다운로드</string>
+    <string name="xml_btn_showDownList">목록 보기</string>
+    <string name="xml_btn_patchDsky">운영사(Digitalsky)</string>
+    <string name="xml_btn_patchBili">비리비리(bilibili)</string>
+    <string name="xml_btn_deleteDsky">운영사(Digitalsky)\n앱 제거</string>
+    <string name="xml_btn_deleteBili">비리비리(bilibili)\n앱 제거</string>
+    <string name="xml_btn_unCensored">검열 해제(루팅 기기 전용)</string>
+    <string name="xml_btn_deletePatch">TextKR 패치 제거</string>
+    <string name="xml_btn_serverChange">서버 변경</string>
+
+    <string name="xml_latestDigitalskyVersion">운영사 최신버전</string>
+    <string name="xml_currentDigitalskyVersion">설치된 운영사 버전</string>
+    <string name="xml_latestBilibiliVersion">비리비리 최신버전</string>
+    <string name="xml_currentBilibiliVersion">설치된 비리비리 버전</string>
+    <string name="xml_recommandLatest">소녀전선 앱은 최신버전을 유지하실 것을 권장합니다.</string>
+    <string name="xml_guiWarning">\n중문판 소녀전선을 제거하고 설치해주세요.\n해당 기능은 추가 기능 탭에서 제공하고 있습니다.</string>
+    <string name="xml_guiNotice">공지사항</string>
+
+    <string name="xml_textUpdate"><b>텍스트 변경일자</b></string>
+    <string name="xml_textWarning">\n인게임 데이터 업데이트를 받으신 후 패치해주세요.\n업데이트가 되어 있지 않으면 패치가 적용되지 않습니다.</string>
+    <string name="xml_textNotice"><b>공지사항</b></string>
+    <string name="xml_providePatch">한글패치 제공\nhttp://ddb.kirsi.moe/main.html#frozen</string>
+
+    <string name="xml_btn_askAgree">푸쉬 알림 설정</string>
+    <string name="xml_btn_umbUpdate">업데이트</string>
+    <string name="xml_descAddons"><![CDATA[<br>아래의 기능들은 <font color="#ffaa00">편의를 위해 제공되는 기능</font>들입니다.<br><font color="#ffaa00">필요에 따라</font> 사용해주세요.]]></string>
+    <string name="xml_descIcon">아이콘 : </string>
+    <string name="xml_umbCurVersion">우산 현재버전 : </string>
+    <string name="xml_umbLastVersion">우산 최신버전 : </string>
+
+    <string name="xml_checkbox_noshow">이후에는 표시하지 않음</string>
+
+    <string name="xml_noticeNone">서버로부터 정보를 받지 못했습니다.</string>
+
+    <string name="xml_swi_serverChangeOn">서버 변경 활성화</string>
+    <string name="xml_swi_serverChangeOff">서버 변경 비활성화</string>
+
+    <string name="menu_refresh">새로고침</string>
+    <string name="menu_help">도움말</string>
+    <string name="menu_help_back">이전</string>
+    <string name="menu_help_forward">다음</string>
+
+    <string name="helpTitle_text">TextKR 도움말</string>
+    <string name="helpTitle_gui">GUIKR 도움말</string>
+    <string name="helpTitle_addon">추가기능 도움말</string>
+
+    <string-array name="spinner_icon">
+        <item>소갤 핫산</item>
+        <item>수오미쟝</item>
+        <item>다스부츠(?)</item>
+    </string-array>
 </resources>

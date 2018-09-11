@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:app="http://schemas.android.com/apk/res-auto"
+xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group
+        android:id="@+id/up_menu"
+        android:checkableBehavior="single">
+        <item
+            android:checked="true"
+            android:id="@+id/nav_textpatch"
+            android:icon="@drawable/ic_transform_black"
+            android:title="@string/nav_menu_textpatch"
+            />
+        <item
+            android:id="@+id/nav_guipatch"
+            android:icon="@drawable/ic_file_download_black"
+            android:title="@string/nav_menu_guidownload" />
+        <item
+            android:id="@+id/nav_additional"
+            android:icon="@drawable/ic_thumb_up_black"
+            android:title="@string/nav_menu_additional"/>
+    </group>
+    <group
+        android:id="@+id/bottom_menu"
+        android:checkableBehavior="none">
+        <item
+            android:id="@+id/nav_info"
+            android:icon="@drawable/ic_info_outline_black"
+            android:title="@string/nav_menu_information"/>
+        <item
+            android:id="@+id/nav_gofrozen"
+            android:icon="@drawable/ic_ac_unit_black"
+            android:title="@string/nav_menu_gofrozen"/>
+    </group>
+</menu>
