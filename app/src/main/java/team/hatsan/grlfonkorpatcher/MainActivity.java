@@ -140,7 +140,8 @@ public class MainActivity extends AppCompatActivity
     long latestID = -1;
 
     String[] platformPackageName = {"com.digitalsky.girlsfrontline.cn", "com.digitalsky.girlsfrontline.cn.bili"};
-    String[] patchFileType = {"asset_language.ab", "asset_textes.ab"};
+    //2018년 9월 12일 3.2 패치에서 asset_language.ab가
+    String[] patchFileType = {"asset_config.ab", "asset_textes.ab"};
 
     String umbURL;
 

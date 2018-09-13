@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">우산</string>
     <string name="banner_ad_unit_id" translatable="false">ca-app-pub-8020827438513908/5097328957</string>
-    <string name="request_URL" translatable="false">http://ftp.frozens.org/check32.json</string>
+    <string name="request_URL" translatable="false">http://ftp.iorph.com/check32.json</string>
     <string name="fronzens_URL" translatable="false">http://ddb.kirsi.moe/main.html#frozen</string>
 
     <string name="navigation_drawer_open" translatable="false">Open navigation drawer</string>
