@@ -93,8 +93,8 @@ public class MainActivity extends AppCompatActivity
     public class Directories {
         public String forDownload;
 
-        public String[] forPatch = {Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn/files/Android/",
-                Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn.bili/files/Android/"};
+        public String[] forPatch = {Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn/files/Android/New/",
+                Environment.getExternalStorageDirectory() + "/Android/data/com.digitalsky.girlsfrontline.cn.bili/files/Android/New/"};
     }
 
     SharedPreferences settings;
