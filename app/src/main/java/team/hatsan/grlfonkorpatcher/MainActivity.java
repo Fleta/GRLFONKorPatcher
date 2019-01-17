@@ -466,9 +466,11 @@ public class MainActivity extends AppCompatActivity
         if (languageFile.exists() && textesFile.exists()) {
             Long langSize = languageFile.length();
             Long textesSize = textesFile.length();
-            if (languageFileSize.equals(langSize.toString()) && textesFileSize.equals(textesSize.toString())) {
-                return true;
-            }
+            return languageFileSize.equals(langSize.toString()) && textesFileSize.equals(textesSize.toString());
+        }
+        else if(textesFile.exists()){ //v3.3, asset_config.ab 파일 존재하지 않을 떄
+            Long textesSize = textesFile.length();
+            return textesFileSize.equals(textesSize.toString());
         }
         return false;
     }
@@ -672,9 +674,9 @@ public class MainActivity extends AppCompatActivity
             BufferedReader reader, reader1;
             if(flag.equals("mica")){ //mica
                 try{
-                    execute("chmod 777 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.xml");
+                    execute("chmod 777 data/data/com.digitalsky.girlsfrontline.cn/shared_prefs/com.digitalsky.girlsfrontline.cn.v2.playerprefs.xml");
                     //reader = execute("cd data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs\nls -al");
-                    String micaPath = "data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.xml";
+                    String micaPath = "data/data/com.digitalsky.girlsfrontline.cn/shared_prefs/com.digitalsky.girlsfrontline.cn.v2.playerprefs.xml";
                     reader = execute("cat " + micaPath);
                     String output, sTemp = "";
                     StringBuffer buffer = new StringBuffer();
@@ -693,7 +695,7 @@ public class MainActivity extends AppCompatActivity
 
                     //file change
                     writeFile(micaPath, buffer.toString());
-                    execute("chmod 440 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.xml");
+                    execute("chmod 440 data/data/com.digitalsky.girlsfrontline.cn/shared_prefs/com.digitalsky.girlsfrontline.cn.v2.playerprefs.xml");
                 }
                 catch(Exception e){
                     e.printStackTrace();
@@ -701,9 +703,9 @@ public class MainActivity extends AppCompatActivity
             }
             else{ //bili
                 try{
-                    execute("chmod 777 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.xml");
+                    execute("chmod 777 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.v2.playerprefs.xml");
                     //reader = execute("cd data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs\nls -al");
-                    String biliPath = "data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.xml";
+                    String biliPath = "data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.v2.playerprefs.xml";
                     reader = execute("cat " + biliPath);
                     String output, sTemp = "";
                     StringBuffer buffer = new StringBuffer();
@@ -722,7 +724,7 @@ public class MainActivity extends AppCompatActivity
 
                     //file change
                     writeFile(biliPath, buffer.toString());
-                    execute("chmod 440 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.xml");
+                    execute("chmod 440 data/data/com.digitalsky.girlsfrontline.cn.bili/shared_prefs/com.digitalsky.girlsfrontline.cn.bili.v2.playerprefs.xml");
                 }
                 catch(Exception e){
                     e.printStackTrace();
@@ -797,7 +799,7 @@ public class MainActivity extends AppCompatActivity
                 byte[] buffer = new byte[fileSize];
                 inputStream.read(buffer);
                 inputStream.close();
-                vanillaString = new String(buffer, "UTF-8");
+                vanillaString = new String(buffer, "UTF-8"); //check32.json 내용물
 
                 JSONObject blockAndroid = new JSONObject(vanillaString).getJSONObject("app_version").getJSONObject("android");
                 JSONObject blockguiroot = blockAndroid.getJSONObject("gui");
@@ -891,12 +893,12 @@ public class MainActivity extends AppCompatActivity
         File patchZipFile = new File(directories.forDownload, "patch.zip");
         String forUnzip = directories.forDownload + "/unzip/";
 
-        File newLagFile = new File(forUnzip, patchFileType[0]);
+//        File newLagFile = new File(forUnzip, patchFileType[0]);
         File newTextesFile = new File(forUnzip, patchFileType[1]);
 
-        if(newLagFile.exists()){
-            newLagFile.delete();
-        }
+//        if(newLagFile.exists()){
+//            newLagFile.delete();
+//        }
         if(newTextesFile.exists()){
             newTextesFile.delete();
         }
@@ -904,21 +906,30 @@ public class MainActivity extends AppCompatActivity
         Decompress decompress = new Decompress(patchZipFile.toString(), forUnzip);
         decompress.unzip();
 
-        File targetLangFile = new File(directories.forPatch[platform], patchFileType[0]);
+//        File targetLangFile = new File(directories.forPatch[platform], patchFileType[0]);
         File targetTextesFile = new File(directories.forPatch[platform], patchFileType[1]);
 
-        if(targetLangFile.exists())
-        {
-            targetLangFile.delete();
-        }
+//        if(targetLangFile.exists())
+//        {
+//            targetLangFile.delete();
+//        }
         if(targetTextesFile.exists())
         {
             targetTextesFile.delete();
         }
 
         try{
-            FileInputStream inputStream = new FileInputStream(newLagFile);
-            FileOutputStream outputStream = new FileOutputStream(targetLangFile);
+//            FileInputStream inputStream = new FileInputStream(newLagFile);
+//            FileOutputStream outputStream = new FileOutputStream(targetLangFile);
+
+//            FileChannel fcin = inputStream.getChannel();
+//            FileChannel fcout = outputStream.getChannel();
+
+//            long fileSize = fcin.size();
+//            fcin.transferTo(0, fileSize, fcout);
+
+            FileInputStream inputStream = new FileInputStream(newTextesFile);
+            FileOutputStream outputStream = new FileOutputStream(targetTextesFile);
 
             FileChannel fcin = inputStream.getChannel();
             FileChannel fcout = outputStream.getChannel();
@@ -926,21 +937,12 @@ public class MainActivity extends AppCompatActivity
             long fileSize = fcin.size();
             fcin.transferTo(0, fileSize, fcout);
 
-            inputStream = new FileInputStream(newTextesFile);
-            outputStream = new FileOutputStream(targetTextesFile);
-
-            fcin = inputStream.getChannel();
-            fcout = outputStream.getChannel();
-
-            fileSize = fcin.size();
-            fcin.transferTo(0, fileSize, fcout);
-
             inputStream.close();
             outputStream.close();
             fcin.close();
             fcout.close();
 
-            newLagFile.delete();
+//            newLagFile.delete();
             newTextesFile.delete();
 
             okMsgBox(getString(R.string.msgbox_title_patchComplete), getString(R.string.msgbox_desc_patchComplete));
